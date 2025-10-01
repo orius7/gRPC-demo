@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package contract;
+
+option go_package = "grpc-go-demo/proto;proto";
+
+
+// The request message
+message ContractRequest {
+  string name = 1;
+}
+
+
+// The response message
+message ContractResponse {
+  string message = 1;
+}
+
+
+// The service definition
+service ContractService {
+  // Unary RPC
+  rpc SayHello (ContractRequest) returns (ContractResponse);
+}
