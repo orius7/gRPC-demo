@@ -5,6 +5,12 @@ package contract;
 option go_package = "grpc-go-demo/proto;proto";
 
 
+//A message that stores user ID's mapped to their names
+message UserDirectory {
+  //key = id, value = name
+  map<int32, string> users = 1;
+}
+
 // The request message
 message ContractRequest {
   string name = 1;
