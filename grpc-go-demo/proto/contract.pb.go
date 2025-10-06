@@ -29,6 +29,22 @@ type ContractRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
+// A message that stores user ID's mapped to their names
+// Minimal manual addition so server code can construct a UserDirectory
+// without requiring protoc regeneration in this environment.
+type UserDirectory struct {
+	// key = id, value = name
+	Users map[int32]string `json:"users,omitempty"`
+}
+
+func (x *UserDirectory) GetUsers() map[int32]string {
+	if x != nil {
+		return x.Users
+	}
+	return nil
+}
+
+
 func (x *ContractRequest) Reset() {
 	*x = ContractRequest{}
 	mi := &file_proto_contract_proto_msgTypes[0]

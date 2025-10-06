@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	pb "grpc-go-demo/proto"
+	pb "grpc-go-demo/grpc-go-demo/proto"
 	"google.golang.org/grpc"
 )
 
