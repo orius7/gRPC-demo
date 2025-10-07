@@ -7,44 +7,44 @@ import (
 	"net"
 
 	pb "grpc-go-demo/grpc-go-demo/proto"
+
 	"google.golang.org/grpc"
 )
 
-type contractServer struct {
-	pb.UnimplementedContractServiceServer
+type server struct {
+	pb.UnimplementedUserDirectoryServiceServer
+	users map[int32]string
 }
 
-func (s *contractServer) SayHello(ctx context.Context, req *pb.ContractRequest) (*pb.ContractResponse, error) {
-	return &pb.ContractResponse{Message: "Hello, " + req.GetName()}, nil
+func (s *server) AddUser(ctx context.Context, req *pb.AddUserRequest) (*pb.AddUserResponse, error) {
+	s.users[req.Id] = req.Name
+	fmt.Printf("Added user: %v (%d)\n", req.Name, req.Id)
+
+	return &pb.AddUserResponse{
+		Message:   fmt.Sprintf("Added user %s", req.Name),
+		Directory: &pb.UserDirectory{Users: s.users},
+	}, nil
 }
 
 func main() {
-	//create a default User Directory using proto schema 
-	dir := &pb.UserDirectory{
-		Users: map[int32]string{
-			1: "Alice",
-			2: "Bob",
-			3: "Charlie",
-		},
-	}
-
-	//next steps:
-	//allows server to update dictionary
-	//allows client to query dictionary
-	
-	_ = dir // intentionally tells compiler to ignore unused variable, "im aware of dir but im not using it right now"
-	//go doesn't allow unused variables
-
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	grpcServer := grpc.NewServer()
-	pb.RegisterContractServiceServer(grpcServer, &contractServer{})
+	s := grpc.NewServer()
+	/*
+		pb.RegisterUserDirectoryServiceServer(s, &server{
+			users: map[int32]string{
+				1: "Alice",
+				2: "Bob",
+				3: "Charlie",
+			},
+		})
 
-	fmt.Println("Server listening on :50051")
-	if err := grpcServer.Serve(lis); err != nil {
+	*/
+	log.Println("Server listening on :50051")
+	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }

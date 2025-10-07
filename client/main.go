@@ -7,6 +7,7 @@ import (
 	"time"
 
 	pb "grpc-go-demo/grpc-go-demo/proto"
+
 	"google.golang.org/grpc"
 )
 
@@ -17,15 +18,23 @@ func main() {
 	}
 	defer conn.Close()
 
-	client := pb.NewContractServiceClient(conn)
+	client := pb.NewUserDirectoryServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	resp, err := client.SayHello(ctx, &pb.ContractRequest{Name: "Aidan"})
+	resp, err := client.AddUser(ctx, &pb.AddUserRequest{Id: 4, Name: "TESTER"})
 	if err != nil {
-		log.Fatalf("could not greet: %v", err)
+		log.Fatalf("could not add: %v", err)
 	}
 
-	fmt.Println("Response:", resp.GetMessage())
+	//temporary to avoid unused variable error
+	_ = resp
+	//fmt.Println(resp)
+	fmt.Println("Updated User Directory:")
+	/*
+		for id, name := range resp.GetUserDirectory().GetUsers() {
+			fmt.Printf("  ID: %d, Name: %s\n", id, name)
+		}
+	*/
 }

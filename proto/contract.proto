@@ -6,25 +6,48 @@ option go_package = "grpc-go-demo/proto;proto";
 
 
 //A message that stores user ID's mapped to their names
+message User {
+  int32 id = 1;
+  string name = 2;
+}
+
 message UserDirectory {
   //key = id, value = name
   map<int32, string> users = 1;
 }
 
-// The request message
-message ContractRequest {
-  string name = 1;
+message AddUserRequest {
+  int32 id = 1;
+  string name = 2;
 }
 
-
-// The response message
-message ContractResponse {
+// Response after adding a user
+message AddUserResponse {
   string message = 1;
+  UserDirectory directory = 2;
+}
+
+message RemoveUserRequest {
+  int32 id = 1;
 }
 
 
-// The service definition
-service ContractService {
-  // Unary RPC
-  rpc SayHello (ContractRequest) returns (ContractResponse);
+
+
+message Empty {}
+
+//client can request entire UserDirectory
+//client always synchronized
+service UserDirectoryService {
+  // Adds a user to the directory
+  rpc AddUser(AddUserRequest) returns (Empty);
+
+  // Removes a user from the directory
+  rpc RemoveUser(RemoveUserRequest) returns (Empty);
+
+  // Fetches the full directory
+  rpc GetUserDirectory(Empty) returns (UserDirectory);
+
+  // Stream of updates — clients can subscribe and get live updates
+  rpc StreamDirectory(Empty) returns (stream UserDirectory);
 }

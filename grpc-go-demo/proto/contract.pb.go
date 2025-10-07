@@ -21,20 +21,95 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// The request message
-type ContractRequest struct {
+// A message that stores user ID's mapped to their names
+type User struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-// A message that stores user ID's mapped to their names
-// Minimal manual addition so server code can construct a UserDirectory
-// without requiring protoc regeneration in this environment.
+func (x *User) Reset() {
+	*x = User{}
+	mi := &file_proto_contract_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *User) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*User) ProtoMessage() {}
+
+func (x *User) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_contract_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use User.ProtoReflect.Descriptor instead.
+func (*User) Descriptor() ([]byte, []int) {
+	return file_proto_contract_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *User) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *User) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
 type UserDirectory struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
 	// key = id, value = name
-	Users map[int32]string `json:"users,omitempty"`
+	Users         map[int32]string `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UserDirectory) Reset() {
+	*x = UserDirectory{}
+	mi := &file_proto_contract_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserDirectory) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserDirectory) ProtoMessage() {}
+
+func (x *UserDirectory) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_contract_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserDirectory.ProtoReflect.Descriptor instead.
+func (*UserDirectory) Descriptor() ([]byte, []int) {
+	return file_proto_contract_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UserDirectory) GetUsers() map[int32]string {
@@ -44,22 +119,29 @@ func (x *UserDirectory) GetUsers() map[int32]string {
 	return nil
 }
 
+type AddUserRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
 
-func (x *ContractRequest) Reset() {
-	*x = ContractRequest{}
-	mi := &file_proto_contract_proto_msgTypes[0]
+func (x *AddUserRequest) Reset() {
+	*x = AddUserRequest{}
+	mi := &file_proto_contract_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ContractRequest) String() string {
+func (x *AddUserRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ContractRequest) ProtoMessage() {}
+func (*AddUserRequest) ProtoMessage() {}
 
-func (x *ContractRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_contract_proto_msgTypes[0]
+func (x *AddUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_contract_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -70,41 +152,49 @@ func (x *ContractRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ContractRequest.ProtoReflect.Descriptor instead.
-func (*ContractRequest) Descriptor() ([]byte, []int) {
-	return file_proto_contract_proto_rawDescGZIP(), []int{0}
+// Deprecated: Use AddUserRequest.ProtoReflect.Descriptor instead.
+func (*AddUserRequest) Descriptor() ([]byte, []int) {
+	return file_proto_contract_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ContractRequest) GetName() string {
+func (x *AddUserRequest) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *AddUserRequest) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-// The response message
-type ContractResponse struct {
+// Response after adding a user
+type AddUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	Directory     *UserDirectory         `protobuf:"bytes,2,opt,name=directory,proto3" json:"directory,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ContractResponse) Reset() {
-	*x = ContractResponse{}
-	mi := &file_proto_contract_proto_msgTypes[1]
+func (x *AddUserResponse) Reset() {
+	*x = AddUserResponse{}
+	mi := &file_proto_contract_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ContractResponse) String() string {
+func (x *AddUserResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ContractResponse) ProtoMessage() {}
+func (*AddUserResponse) ProtoMessage() {}
 
-func (x *ContractResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_contract_proto_msgTypes[1]
+func (x *AddUserResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_contract_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -115,29 +205,134 @@ func (x *ContractResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ContractResponse.ProtoReflect.Descriptor instead.
-func (*ContractResponse) Descriptor() ([]byte, []int) {
-	return file_proto_contract_proto_rawDescGZIP(), []int{1}
+// Deprecated: Use AddUserResponse.ProtoReflect.Descriptor instead.
+func (*AddUserResponse) Descriptor() ([]byte, []int) {
+	return file_proto_contract_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *ContractResponse) GetMessage() string {
+func (x *AddUserResponse) GetMessage() string {
 	if x != nil {
 		return x.Message
 	}
 	return ""
 }
 
+func (x *AddUserResponse) GetDirectory() *UserDirectory {
+	if x != nil {
+		return x.Directory
+	}
+	return nil
+}
+
+type RemoveUserRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveUserRequest) Reset() {
+	*x = RemoveUserRequest{}
+	mi := &file_proto_contract_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveUserRequest) ProtoMessage() {}
+
+func (x *RemoveUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_contract_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveUserRequest.ProtoReflect.Descriptor instead.
+func (*RemoveUserRequest) Descriptor() ([]byte, []int) {
+	return file_proto_contract_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *RemoveUserRequest) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type Empty struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Empty) Reset() {
+	*x = Empty{}
+	mi := &file_proto_contract_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Empty) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Empty) ProtoMessage() {}
+
+func (x *Empty) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_contract_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Empty.ProtoReflect.Descriptor instead.
+func (*Empty) Descriptor() ([]byte, []int) {
+	return file_proto_contract_proto_rawDescGZIP(), []int{5}
+}
+
 var File_proto_contract_proto protoreflect.FileDescriptor
 
 const file_proto_contract_proto_rawDesc = "" +
 	"\n" +
-	"\x14proto/contract.proto\x12\bcontract\"%\n" +
-	"\x0fContractRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\",\n" +
-	"\x10ContractResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage2T\n" +
-	"\x0fContractService\x12A\n" +
-	"\bSayHello\x12\x19.contract.ContractRequest\x1a\x1a.contract.ContractResponseB\x1aZ\x18grpc-go-demo/proto;protob\x06proto3"
+	"\x14proto/contract.proto\x12\bcontract\"*\n" +
+	"\x04User\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"\x83\x01\n" +
+	"\rUserDirectory\x128\n" +
+	"\x05users\x18\x01 \x03(\v2\".contract.UserDirectory.UsersEntryR\x05users\x1a8\n" +
+	"\n" +
+	"UsersEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\x05R\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"4\n" +
+	"\x0eAddUserRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"b\n" +
+	"\x0fAddUserResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\x125\n" +
+	"\tdirectory\x18\x02 \x01(\v2\x17.contract.UserDirectoryR\tdirectory\"#\n" +
+	"\x11RemoveUserRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\"\a\n" +
+	"\x05Empty2\x85\x02\n" +
+	"\x14UserDirectoryService\x124\n" +
+	"\aAddUser\x12\x18.contract.AddUserRequest\x1a\x0f.contract.Empty\x12:\n" +
+	"\n" +
+	"RemoveUser\x12\x1b.contract.RemoveUserRequest\x1a\x0f.contract.Empty\x12<\n" +
+	"\x10GetUserDirectory\x12\x0f.contract.Empty\x1a\x17.contract.UserDirectory\x12=\n" +
+	"\x0fStreamDirectory\x12\x0f.contract.Empty\x1a\x17.contract.UserDirectory0\x01B\x1aZ\x18grpc-go-demo/proto;protob\x06proto3"
 
 var (
 	file_proto_contract_proto_rawDescOnce sync.Once
@@ -151,19 +346,32 @@ func file_proto_contract_proto_rawDescGZIP() []byte {
 	return file_proto_contract_proto_rawDescData
 }
 
-var file_proto_contract_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_proto_contract_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_proto_contract_proto_goTypes = []any{
-	(*ContractRequest)(nil),  // 0: contract.ContractRequest
-	(*ContractResponse)(nil), // 1: contract.ContractResponse
+	(*User)(nil),              // 0: contract.User
+	(*UserDirectory)(nil),     // 1: contract.UserDirectory
+	(*AddUserRequest)(nil),    // 2: contract.AddUserRequest
+	(*AddUserResponse)(nil),   // 3: contract.AddUserResponse
+	(*RemoveUserRequest)(nil), // 4: contract.RemoveUserRequest
+	(*Empty)(nil),             // 5: contract.Empty
+	nil,                       // 6: contract.UserDirectory.UsersEntry
 }
 var file_proto_contract_proto_depIdxs = []int32{
-	0, // 0: contract.ContractService.SayHello:input_type -> contract.ContractRequest
-	1, // 1: contract.ContractService.SayHello:output_type -> contract.ContractResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	6, // 0: contract.UserDirectory.users:type_name -> contract.UserDirectory.UsersEntry
+	1, // 1: contract.AddUserResponse.directory:type_name -> contract.UserDirectory
+	2, // 2: contract.UserDirectoryService.AddUser:input_type -> contract.AddUserRequest
+	4, // 3: contract.UserDirectoryService.RemoveUser:input_type -> contract.RemoveUserRequest
+	5, // 4: contract.UserDirectoryService.GetUserDirectory:input_type -> contract.Empty
+	5, // 5: contract.UserDirectoryService.StreamDirectory:input_type -> contract.Empty
+	5, // 6: contract.UserDirectoryService.AddUser:output_type -> contract.Empty
+	5, // 7: contract.UserDirectoryService.RemoveUser:output_type -> contract.Empty
+	1, // 8: contract.UserDirectoryService.GetUserDirectory:output_type -> contract.UserDirectory
+	1, // 9: contract.UserDirectoryService.StreamDirectory:output_type -> contract.UserDirectory
+	6, // [6:10] is the sub-list for method output_type
+	2, // [2:6] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_proto_contract_proto_init() }
@@ -177,7 +385,7 @@ func file_proto_contract_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_contract_proto_rawDesc), len(file_proto_contract_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
