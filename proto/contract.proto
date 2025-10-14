@@ -16,22 +16,9 @@ message UserDirectory {
   map<int32, string> users = 1;
 }
 
-message AddUserRequest {
-  int32 id = 1;
-  string name = 2;
-}
-
-// Response after adding a user
-message AddUserResponse {
-  string message = 1;
-  UserDirectory directory = 2;
-}
-
 message RemoveUserRequest {
   int32 id = 1;
 }
-
-
 
 
 message Empty {}
@@ -39,15 +26,6 @@ message Empty {}
 //client can request entire UserDirectory
 //client always synchronized
 service UserDirectoryService {
-  // Adds a user to the directory
-  rpc AddUser(AddUserRequest) returns (Empty);
-
-  // Removes a user from the directory
-  rpc RemoveUser(RemoveUserRequest) returns (Empty);
-
-  // Fetches the full directory
-  rpc GetUserDirectory(Empty) returns (UserDirectory);
-
-  // Stream of updates — clients can subscribe and get live updates
-  rpc StreamDirectory(Empty) returns (stream UserDirectory);
+  // Stream updates to all connected clients
+  rpc StreamUserDirectory(Empty) returns (stream UserDirectory);
 }

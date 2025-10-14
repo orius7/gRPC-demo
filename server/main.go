@@ -1,50 +1,95 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"log"
-	"net"
+	"sync"
+	"time"
 
 	pb "grpc-go-demo/grpc-go-demo/proto"
-
-	"google.golang.org/grpc"
 )
 
 type server struct {
 	pb.UnimplementedUserDirectoryServiceServer
 	users map[int32]string
+	subs  []chan *pb.UserDirectory
+	mu    sync.Mutex
 }
 
-func (s *server) AddUser(ctx context.Context, req *pb.AddUserRequest) (*pb.AddUserResponse, error) {
-	s.users[req.Id] = req.Name
-	fmt.Printf("Added user: %v (%d)\n", req.Name, req.Id)
+func newServer() *server {
+	return &server{
+		users: make(map[int32]string),
+		subs:  make([]chan *pb.UserDirectory, 0),
+	}
+}
 
-	return &pb.AddUserResponse{
-		Message:   fmt.Sprintf("Added user %s", req.Name),
-		Directory: &pb.UserDirectory{Users: s.users},
-	}, nil
+func (s *server) StreamUserDirectory(req *pb.Empty, stream pb.UserDirectoryService_StreamDirectoryServer) error {
+	ch := make(chan *pb.UserDirectory, 1)
+
+	s.mu.Lock()
+	s.subs = append(s.subs, ch)
+	s.mu.Unlock()
+
+	// Send current directory initially
+	ch <- &pb.UserDirectory{Users: s.users}
+
+	for {
+		select {
+		case update := <-ch:
+			if err := stream.Send(update); err != nil {
+				return err
+			}
+		case <-stream.Context().Done():
+			return nil
+		}
+	}
+}
+
+// Server-side functions to modify users
+func (s *server) AddUser(id int32, name string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.users[id] = name
+	s.broadcast()
+}
+
+func (s *server) DeleteUser(id int32) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.users, id)
+	s.broadcast()
+}
+
+func (s *server) broadcast() {
+	dir := &pb.UserDirectory{Users: s.users}
+	for _, sub := range s.subs {
+		sub <- dir
+	}
 }
 
 func main() {
-	lis, err := net.Listen("tcp", ":50051")
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
+	s := newServer()
+	updateChan := make(chan *pb.UserDirectory, 1)
 
-	s := grpc.NewServer()
-	/*
-		pb.RegisterUserDirectoryServiceServer(s, &server{
-			users: map[int32]string{
-				1: "Alice",
-				2: "Bob",
-				3: "Charlie",
-			},
-		})
+	s.mu.Lock()
+	s.subs = append(s.subs, updateChan)
+	s.mu.Unlock()
 
-	*/
-	log.Println("Server listening on :50051")
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
+	go func() {
+		for update := range updateChan {
+			log.Printf("client received update: %v", update.Users)
+		}
+	}()
+
+	s.AddUser(1, "Alice")
+	time.Sleep(1 * time.Second)
+
+	s.AddUser(2, "Bob")
+	time.Sleep(1 * time.Second)
+
+	s.DeleteUser(1)
+	time.Sleep(1 * time.Second)
+
+	s.AddUser(3, "Charlie")
+	time.Sleep(1 * time.Second)
+
 }

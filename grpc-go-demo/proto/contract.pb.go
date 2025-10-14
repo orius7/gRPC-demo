@@ -7,11 +7,12 @@
 package proto
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -174,8 +175,7 @@ func (x *AddUserRequest) GetName() string {
 // Response after adding a user
 type AddUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
-	Directory     *UserDirectory         `protobuf:"bytes,2,opt,name=directory,proto3" json:"directory,omitempty"`
+	Users         map[int32]string       `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -210,16 +210,9 @@ func (*AddUserResponse) Descriptor() ([]byte, []int) {
 	return file_proto_contract_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *AddUserResponse) GetMessage() string {
+func (x *AddUserResponse) GetUsers() map[int32]string {
 	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
-func (x *AddUserResponse) GetDirectory() *UserDirectory {
-	if x != nil {
-		return x.Directory
+		return x.Users
 	}
 	return nil
 }
@@ -320,10 +313,13 @@ const file_proto_contract_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"4\n" +
 	"\x0eAddUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\"b\n" +
-	"\x0fAddUserResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\x125\n" +
-	"\tdirectory\x18\x02 \x01(\v2\x17.contract.UserDirectoryR\tdirectory\"#\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"\x87\x01\n" +
+	"\x0fAddUserResponse\x12:\n" +
+	"\x05users\x18\x01 \x03(\v2$.contract.AddUserResponse.UsersEntryR\x05users\x1a8\n" +
+	"\n" +
+	"UsersEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\x05R\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"#\n" +
 	"\x11RemoveUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\"\a\n" +
 	"\x05Empty2\x85\x02\n" +
@@ -346,7 +342,7 @@ func file_proto_contract_proto_rawDescGZIP() []byte {
 	return file_proto_contract_proto_rawDescData
 }
 
-var file_proto_contract_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_proto_contract_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_proto_contract_proto_goTypes = []any{
 	(*User)(nil),              // 0: contract.User
 	(*UserDirectory)(nil),     // 1: contract.UserDirectory
@@ -355,10 +351,11 @@ var file_proto_contract_proto_goTypes = []any{
 	(*RemoveUserRequest)(nil), // 4: contract.RemoveUserRequest
 	(*Empty)(nil),             // 5: contract.Empty
 	nil,                       // 6: contract.UserDirectory.UsersEntry
+	nil,                       // 7: contract.AddUserResponse.UsersEntry
 }
 var file_proto_contract_proto_depIdxs = []int32{
 	6, // 0: contract.UserDirectory.users:type_name -> contract.UserDirectory.UsersEntry
-	1, // 1: contract.AddUserResponse.directory:type_name -> contract.UserDirectory
+	7, // 1: contract.AddUserResponse.users:type_name -> contract.AddUserResponse.UsersEntry
 	2, // 2: contract.UserDirectoryService.AddUser:input_type -> contract.AddUserRequest
 	4, // 3: contract.UserDirectoryService.RemoveUser:input_type -> contract.RemoveUserRequest
 	5, // 4: contract.UserDirectoryService.GetUserDirectory:input_type -> contract.Empty
@@ -385,7 +382,7 @@ func file_proto_contract_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_contract_proto_rawDesc), len(file_proto_contract_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

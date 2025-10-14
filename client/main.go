@@ -27,14 +27,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not add: %v", err)
 	}
-
-	//temporary to avoid unused variable error
-	_ = resp
-	//fmt.Println(resp)
 	fmt.Println("Updated User Directory:")
-	/*
-		for id, name := range resp.GetUserDirectory().GetUsers() {
-			fmt.Printf("  ID: %d, Name: %s\n", id, name)
-		}
-	*/
+
+	for id, name := range resp.GetUserDirectory().GetUsers() {
+		fmt.Printf("  ID: %d, Name: %s\n", id, name)
+	}
+
 }
