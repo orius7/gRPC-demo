@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
-	"time"
 
 	pb "grpc-go-demo/grpc-go-demo/proto"
 
@@ -12,25 +12,30 @@ import (
 )
 
 func main() {
-	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+	conn, err := grpc.NewClient("localhost:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
 
 	client := pb.NewUserDirectoryServiceClient(conn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	resp, err := client.AddUser(ctx, &pb.AddUserRequest{Id: 4, Name: "TESTER"})
+	stream, err := client.StreamDirectory(context.Background(), &pb.Empty{})
 	if err != nil {
-		log.Fatalf("could not add: %v", err)
-	}
-	fmt.Println("Updated User Directory:")
-
-	for id, name := range resp.GetUserDirectory().GetUsers() {
-		fmt.Printf("  ID: %d, Name: %s\n", id, name)
+		log.Fatalf("could not start stream: %v", err)
 	}
 
+	for {
+		update, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatalf("error receiving update: %v", err)
+		}
+
+		fmt.Println("📢 Directory update:")
+		for id, name := range update.Users {
+			fmt.Printf("  ID: %d, Name: %s\n", id, name)
+		}
+	}
 }
