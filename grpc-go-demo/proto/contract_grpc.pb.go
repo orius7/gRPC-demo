@@ -8,7 +8,6 @@ package proto
 
 import (
 	context "context"
-
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -20,10 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserDirectoryService_AddUser_FullMethodName          = "/contract.UserDirectoryService/AddUser"
-	UserDirectoryService_RemoveUser_FullMethodName       = "/contract.UserDirectoryService/RemoveUser"
-	UserDirectoryService_GetUserDirectory_FullMethodName = "/contract.UserDirectoryService/GetUserDirectory"
-	UserDirectoryService_StreamDirectory_FullMethodName  = "/contract.UserDirectoryService/StreamDirectory"
+	UserDirectoryService_StreamUserDirectory_FullMethodName = "/contract.UserDirectoryService/StreamUserDirectory"
 )
 
 // UserDirectoryServiceClient is the client API for UserDirectoryService service.
@@ -33,14 +29,8 @@ const (
 // client can request entire UserDirectory
 // client always synchronized
 type UserDirectoryServiceClient interface {
-	// Adds a user to the directory
-	AddUser(ctx context.Context, in *AddUserRequest, opts ...grpc.CallOption) (*Empty, error)
-	// Removes a user from the directory
-	RemoveUser(ctx context.Context, in *RemoveUserRequest, opts ...grpc.CallOption) (*Empty, error)
-	// Fetches the full directory
-	GetUserDirectory(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*UserDirectory, error)
-	// Stream of updates — clients can subscribe and get live updates
-	StreamDirectory(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[UserDirectory], error)
+	// Stream updates to all connected clients
+	StreamUserDirectory(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[UserDirectory], error)
 }
 
 type userDirectoryServiceClient struct {
@@ -51,39 +41,9 @@ func NewUserDirectoryServiceClient(cc grpc.ClientConnInterface) UserDirectorySer
 	return &userDirectoryServiceClient{cc}
 }
 
-func (c *userDirectoryServiceClient) AddUser(ctx context.Context, in *AddUserRequest, opts ...grpc.CallOption) (*Empty, error) {
+func (c *userDirectoryServiceClient) StreamUserDirectory(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[UserDirectory], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, UserDirectoryService_AddUser_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userDirectoryServiceClient) RemoveUser(ctx context.Context, in *RemoveUserRequest, opts ...grpc.CallOption) (*Empty, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, UserDirectoryService_RemoveUser_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userDirectoryServiceClient) GetUserDirectory(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*UserDirectory, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UserDirectory)
-	err := c.cc.Invoke(ctx, UserDirectoryService_GetUserDirectory_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userDirectoryServiceClient) StreamDirectory(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[UserDirectory], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &UserDirectoryService_ServiceDesc.Streams[0], UserDirectoryService_StreamDirectory_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &UserDirectoryService_ServiceDesc.Streams[0], UserDirectoryService_StreamUserDirectory_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +58,7 @@ func (c *userDirectoryServiceClient) StreamDirectory(ctx context.Context, in *Em
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type UserDirectoryService_StreamDirectoryClient = grpc.ServerStreamingClient[UserDirectory]
+type UserDirectoryService_StreamUserDirectoryClient = grpc.ServerStreamingClient[UserDirectory]
 
 // UserDirectoryServiceServer is the server API for UserDirectoryService service.
 // All implementations must embed UnimplementedUserDirectoryServiceServer
@@ -107,14 +67,8 @@ type UserDirectoryService_StreamDirectoryClient = grpc.ServerStreamingClient[Use
 // client can request entire UserDirectory
 // client always synchronized
 type UserDirectoryServiceServer interface {
-	// Adds a user to the directory
-	AddUser(context.Context, *AddUserRequest) (*Empty, error)
-	// Removes a user from the directory
-	RemoveUser(context.Context, *RemoveUserRequest) (*Empty, error)
-	// Fetches the full directory
-	GetUserDirectory(context.Context, *Empty) (*UserDirectory, error)
-	// Stream of updates — clients can subscribe and get live updates
-	StreamDirectory(*Empty, grpc.ServerStreamingServer[UserDirectory]) error
+	// Stream updates to all connected clients
+	StreamUserDirectory(*Empty, grpc.ServerStreamingServer[UserDirectory]) error
 	mustEmbedUnimplementedUserDirectoryServiceServer()
 }
 
@@ -125,17 +79,8 @@ type UserDirectoryServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedUserDirectoryServiceServer struct{}
 
-func (UnimplementedUserDirectoryServiceServer) AddUser(context.Context, *AddUserRequest) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddUser not implemented")
-}
-func (UnimplementedUserDirectoryServiceServer) RemoveUser(context.Context, *RemoveUserRequest) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RemoveUser not implemented")
-}
-func (UnimplementedUserDirectoryServiceServer) GetUserDirectory(context.Context, *Empty) (*UserDirectory, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserDirectory not implemented")
-}
-func (UnimplementedUserDirectoryServiceServer) StreamDirectory(*Empty, grpc.ServerStreamingServer[UserDirectory]) error {
-	return status.Errorf(codes.Unimplemented, "method StreamDirectory not implemented")
+func (UnimplementedUserDirectoryServiceServer) StreamUserDirectory(*Empty, grpc.ServerStreamingServer[UserDirectory]) error {
+	return status.Errorf(codes.Unimplemented, "method StreamUserDirectory not implemented")
 }
 func (UnimplementedUserDirectoryServiceServer) mustEmbedUnimplementedUserDirectoryServiceServer() {}
 func (UnimplementedUserDirectoryServiceServer) testEmbeddedByValue()                              {}
@@ -158,70 +103,16 @@ func RegisterUserDirectoryServiceServer(s grpc.ServiceRegistrar, srv UserDirecto
 	s.RegisterService(&UserDirectoryService_ServiceDesc, srv)
 }
 
-func _UserDirectoryService_AddUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddUserRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserDirectoryServiceServer).AddUser(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: UserDirectoryService_AddUser_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserDirectoryServiceServer).AddUser(ctx, req.(*AddUserRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _UserDirectoryService_RemoveUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RemoveUserRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserDirectoryServiceServer).RemoveUser(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: UserDirectoryService_RemoveUser_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserDirectoryServiceServer).RemoveUser(ctx, req.(*RemoveUserRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _UserDirectoryService_GetUserDirectory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserDirectoryServiceServer).GetUserDirectory(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: UserDirectoryService_GetUserDirectory_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserDirectoryServiceServer).GetUserDirectory(ctx, req.(*Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _UserDirectoryService_StreamDirectory_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _UserDirectoryService_StreamUserDirectory_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(Empty)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(UserDirectoryServiceServer).StreamDirectory(m, &grpc.GenericServerStream[Empty, UserDirectory]{ServerStream: stream})
+	return srv.(UserDirectoryServiceServer).StreamUserDirectory(m, &grpc.GenericServerStream[Empty, UserDirectory]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type UserDirectoryService_StreamDirectoryServer = grpc.ServerStreamingServer[UserDirectory]
+type UserDirectoryService_StreamUserDirectoryServer = grpc.ServerStreamingServer[UserDirectory]
 
 // UserDirectoryService_ServiceDesc is the grpc.ServiceDesc for UserDirectoryService service.
 // It's only intended for direct use with grpc.RegisterService,
@@ -229,24 +120,11 @@ type UserDirectoryService_StreamDirectoryServer = grpc.ServerStreamingServer[Use
 var UserDirectoryService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "contract.UserDirectoryService",
 	HandlerType: (*UserDirectoryServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "AddUser",
-			Handler:    _UserDirectoryService_AddUser_Handler,
-		},
-		{
-			MethodName: "RemoveUser",
-			Handler:    _UserDirectoryService_RemoveUser_Handler,
-		},
-		{
-			MethodName: "GetUserDirectory",
-			Handler:    _UserDirectoryService_GetUserDirectory_Handler,
-		},
-	},
+	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "StreamDirectory",
-			Handler:       _UserDirectoryService_StreamDirectory_Handler,
+			StreamName:    "StreamUserDirectory",
+			Handler:       _UserDirectoryService_StreamUserDirectory_Handler,
 			ServerStreams: true,
 		},
 	},
