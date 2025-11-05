@@ -70,6 +70,15 @@ func (s *server) broadcast() {
 	}
 }
 
+func (s *server) RetreiveAll(){
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.broadcast
+}
+
+//add update user details function
+
+
 
 
 func main() {
