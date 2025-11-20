@@ -78,7 +78,7 @@ func (s *server) broadcast() {
 func (s *server) RetreiveAll() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.broadcast
+	s.broadcast()
 }
 
 //add update user details function
@@ -127,7 +127,7 @@ func main() {
 
 	//registers the server instance to handle incoming requests for UserDirectoryService
 	//RegisterUserDirectoryServiceServer is auto-generated from proto file (helper function)
-	pb.RegisterUserDirectoryServiceServer(grpcServer, &server{})
+	pb.RegisterUserDirectoryServiceServer(grpcServer, srv)
 
 	fmt.Println("Server is listening on port 50051...")
 	//Serve(lis) starts gRPC server, starts listening fro incoming connections on the specified listener (lis)
@@ -137,4 +137,8 @@ func main() {
 
 	//what now, i need client to continuously listen to server changes (add / delete users)
 
+	//connect to MongoDB
+	//add data in mongoDB
+	//create functions to add, delete, update user details in MongoDB
+	//whenever a change occurs in MongoDB, server should broadcast updated user directory to all connected clients
 }
