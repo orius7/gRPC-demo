@@ -83,9 +83,8 @@ func (s *server) RetreiveAll() {
 
 //add update user details function
 
-func main() {
+func connectToMongoDB() {
 
-	//get username and password from environment variables
 	uri := os.Getenv("URI")
 	if uri == "" {
 		log.Fatal("Environment variable URI is not set")
@@ -110,6 +109,11 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
+}
+
+func main() {
+
+	connectToMongoDB()
 
 	lis, err := net.Listen("tcp", ":50051") //if client connects to this port, server will accept connection
 	if err != nil {
