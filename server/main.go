@@ -13,6 +13,7 @@ import (
 
 	"google.golang.org/grpc"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
@@ -20,15 +21,17 @@ import (
 
 type server struct {
 	pb.UnimplementedUserDirectoryServiceServer
-	users map[int32]string
-	subs  []chan *pb.UserDirectory
-	mu    sync.Mutex
+	users  map[int32]string
+	subs   []chan *pb.UserDirectory
+	mu     sync.Mutex
+	client *mongo.Client // MongoDB client
 }
 
-func newServer() *server {
+func newServer(client *mongo.Client) *server {
 	return &server{
-		users: make(map[int32]string),
-		subs:  make([]chan *pb.UserDirectory, 0),
+		users:  make(map[int32]string),
+		subs:   make([]chan *pb.UserDirectory, 0),
+		client: client, // Initialize MongoDB client
 	}
 }
 
@@ -40,7 +43,12 @@ func (s *server) StreamUserDirectory(req *pb.Empty, stream pb.UserDirectoryServi
 	s.mu.Unlock()
 
 	// Send initial full directory immediately
-	ch <- &pb.UserDirectory{Users: s.users}
+	users, err := s.retrieveAllUsers() // Fetch from MongoDB
+	if err == nil {
+		ch <- &pb.UserDirectory{Users: users}
+	} else {
+		return err
+	}
 
 	for {
 		select {
@@ -57,33 +65,64 @@ func (s *server) StreamUserDirectory(req *pb.Empty, stream pb.UserDirectoryServi
 func (s *server) AddUser(id int32, name string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.users[id] = name
+	// Add user to MongoDB
+	collection := s.client.Database("your_database").Collection("users")
+	_, err := collection.InsertOne(context.Background(), pb.User{Id: id, Name: name})
+	if err != nil {
+		log.Println("Failed to add user:", err)
+		return
+	}
 	s.broadcast()
 }
 
 func (s *server) DeleteUser(id int32) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	delete(s.users, id)
+	collection := s.client.Database("your_database").Collection("users")
+	_, err := collection.DeleteOne(context.Background(), bson.M{"id": id})
+	if err != nil {
+		log.Println("Failed to delete user:", err)
+		return
+	}
 	s.broadcast()
 }
 
 func (s *server) broadcast() {
-	dir := &pb.UserDirectory{Users: s.users}
+	// Fetch the updated user directory from MongoDB
+	users, err := s.retrieveAllUsers()
+	if err != nil {
+		log.Println("Failed to retrieve users:", err)
+		return
+	}
+	dir := &pb.UserDirectory{Users: users}
 	for _, sub := range s.subs {
 		sub <- dir
 	}
 }
 
-func (s *server) RetreiveAll() {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.broadcast()
+// New method to retrieve all users from MongoDB
+func (s *server) retrieveAllUsers() (map[int32]string, error) {
+	collection := s.client.Database("your_database").Collection("users")
+	cursor, err := collection.Find(context.Background(), nil)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	users := make(map[int32]string)
+	for cursor.Next(context.Background()) {
+		var user pb.User // Assuming your proto has a User message with ID and Name
+		if err := cursor.Decode(&user); err != nil {
+			return nil, err
+		}
+		users[user.Id] = user.Name
+	}
+	return users, nil
 }
 
 //add update user details function
 
-func connectToMongoDB() {
+func connectToMongoDB() *mongo.Client {
 
 	uri := os.Getenv("URI")
 	if uri == "" {
@@ -109,11 +148,13 @@ func connectToMongoDB() {
 		panic(err)
 	}
 	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
+
+	return client
 }
 
 func main() {
 
-	connectToMongoDB()
+	client := connectToMongoDB()
 
 	lis, err := net.Listen("tcp", ":50051") //if client connects to this port, server will accept connection
 	if err != nil {
@@ -122,7 +163,7 @@ func main() {
 
 	//creates new gRPC server instance, not started yet
 
-	srv := newServer()
+	srv := newServer(client)
 	grpcServer := grpc.NewServer()
 
 	//registers the server instance to handle incoming requests for UserDirectoryService
@@ -138,7 +179,7 @@ func main() {
 	//what now, i need client to continuously listen to server changes (add / delete users)
 
 	//connect to MongoDB
-	//add data in mongoDB
+	//add data in mongoDB (here)
 	//create functions to add, delete, update user details in MongoDB
 	//whenever a change occurs in MongoDB, server should broadcast updated user directory to all connected clients
 }
